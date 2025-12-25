@@ -86,29 +86,29 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/jam-kbm/category', [JamKbmController::class, 'storeCategory'])->name('jam_kbm.category.store');
         Route::post('/jam-kbm/activate', [JamKbmController::class, 'activate'])->name('jam_kbm.activate');
 
-    }); // <-- Tutup Group Master di sini (PENTING!)
+    }); // <-- Tutup Group Master
 
 
     /// D. MODUL KESISWAAN (Di luar Master, tapi masih dalam Admin)
     Route::prefix('murid')->name('murid.')->group(function () {
         
-        // 1. Tampilan Utama (Index)
-        Route::get('/', [MuridController::class, 'index'])->name('index');
-
-        // 2. Fitur Import Excel & Template (PENTING: Ini perbaikan namanya)
+        // 1. ROUTE SPESIAL (AJAX & IMPORT) - TARUH DI ATAS
+        Route::get('/export-excel', [MuridController::class, 'exportExcel'])->name('export_excel');
+        Route::get('/export-pdf', [MuridController::class, 'exportPdf'])->name('export_pdf');
+        Route::post('/save-draft', [MuridController::class, 'saveDraft'])->name('save_draft'); // <--- INI WAJIB ADA
         Route::post('/import', [MuridController::class, 'import'])->name('import');
         Route::get('/template', [MuridController::class, 'downloadTemplate'])->name('template');
 
-        // 3. Fitur Tambah Manual (Create & Store) - INI SOLUSI ERRORNYA
+        // 2. ROUTE STANDAR
+        Route::get('/', [MuridController::class, 'index'])->name('index');
         Route::get('/create', [MuridController::class, 'create'])->name('create');
-        Route::post('/store', [MuridController::class, 'store'])->name('store');
+        Route::post('/store', [MuridController::class, 'store'])->name('store'); 
 
-        // 4. Fitur Edit & Update
+        // 3. ROUTE DINAMIS (ID)
+        Route::get('/{id}', [MuridController::class, 'show'])->name('show'); 
         Route::get('/{id}/edit', [MuridController::class, 'edit'])->name('edit');
         Route::put('/{id}', [MuridController::class, 'update'])->name('update');
-
-        // 5. Fitur Hapus (Delete)
         Route::delete('/{id}', [MuridController::class, 'destroy'])->name('destroy');
     });
 
-}); // <-- Ini Tutup Kurung milik Group Admin (Jangan dihapus)
+});

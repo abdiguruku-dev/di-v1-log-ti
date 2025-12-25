@@ -1,212 +1,281 @@
 @extends('layouts.admin_master')
-@section('page_title', 'Data Murid Aktif')
+
+@section('title', 'Data Murid')
 
 @section('content')
 <div class="container-fluid">
-    
+
+    {{-- 1. HEADING HALAMAN --}}
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Manajemen Data Murid</h1>
+    </div>
+
+    {{-- 2. NOTIFIKASI SYSTEM (ALERT) --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <strong class="d-block mb-2"><i class="bi bi-exclamation-octagon-fill me-2"></i> Error Import:</strong>
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    {{-- 3. CARD UTAMA --}}
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-white">Daftar Murid</h6>
-            
-            <div class="d-flex gap-2"> <a href="{{ route('admin.murid.create') }}" class="btn btn-orange btn-sm">
-                    <i class="bi bi-plus-circle"></i> Tambah Murid
-                </a>
-
-                <button type="button" class="btn btn-yellow btn-sm" data-bs-toggle="modal" data-bs-target="#importExcelModal">
-                    <i class="bi bi-file-earmark-spreadsheet"></i> Import Via Excel
-                </button>
-
-                <a href="{{ route('admin.murid.template') }}" class="btn btn-purple btn-sm">
-                    <i class="bi bi-download"></i> Download Format
-                </a>
-
-            </div>
+        
+        {{-- HEADER --}}
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="bi bi-table me-1"></i> Daftar Semua Murid
+            </h6>
         </div>
 
+        {{-- BODY --}}
         <div class="card-body">
-            {{-- MULAI GANTI DARI SINI --}}
             
-            {{-- 1. Alert Sukses --}}
-            @if(session('success'))
-                <x-alert type="success">
-                    {{ session('success') }}
-                </x-alert>
+            {{-- A. TOOLBAR --}}
+            <div class="row g-2 mb-4 align-items-center justify-content-between">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('admin.murid.create') }}" class="btn btn-sm btn-success shadow-sm px-3">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah Data
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-success shadow-sm" data-bs-toggle="modal" data-bs-target="#importExcel">
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import
+                        </button>
+                        <a href="{{ route('admin.murid.template') }}" class="btn btn-sm btn-info text-white shadow-sm">
+                            <i class="bi bi-download me-1"></i> Format
+                        </a>
+                        <div class="btn-group shadow-sm">
+                            <button type="button" class="btn btn-sm btn-warning dropdown-toggle text-dark" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu shadow animated--fade-in">
+                                <li><h6 class="dropdown-header">Pilih Format:</h6></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.murid.export_excel') }}"><i class="bi bi-file-earmark-excel text-success me-2"></i> Ke Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.murid.export_pdf') }}" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Ke PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <form action="{{ route('admin.murid.index') }}" method="GET">
+                        <div class="input-group input-group-sm shadow-sm">
+                            <input type="text" name="keyword" class="form-control bg-light border-0 small" placeholder="Cari Nama / NIS..." value="{{ request('keyword') }}">
+                            <button class="btn btn-success" type="submit"><i class="bi bi-search"></i></button>
+                            @if(request('keyword'))
+                            <a href="{{ route('admin.murid.index') }}" class="btn btn-secondary" title="Reset"><i class="bi bi-x-circle"></i></a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- B. ALERT HASIL PENCARIAN --}}
+            @if(request('keyword'))
+                <div class="alert alert-success py-2 mb-3 small">
+                    <i class="bi bi-info-circle me-1"></i> Hasil pencarian: <strong>"{{ request('keyword') }}"</strong>.
+                    <a href="{{ route('admin.murid.index') }}" class="alert-link ms-2">Reset</a>
+                </div>
             @endif
 
-            {{-- 2. Alert Error (Manual dari Controller) --}}
-            @if(session('error'))
-                <x-alert type="error">
-                    {{ session('error') }}
-                </x-alert>
-            @endif
-
-            {{-- 3. Alert Validasi (Jika ada error import excel dsb) --}}
-            @if ($errors->any())
-                <x-alert type="error">
-                    <ul class="mb-0 ps-3">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </x-alert>
-            @endif
-
+            {{-- C. TABEL DATA --}}
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th width="5%">No</th>
-                            <th>NIS</th>
-                            <th class="text-center">Foto</th><th>Nama Lengkap</th>
-                            <th>Kelas</th>
-                            <th>L/P</th>
-                            <th>Status</th>
-                            <th class="text-center" width="15%">Aksi</th>
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0" style="border-color: #e3e6f0;">
+                    <thead class="table-light text-dark" style="background-color: #f8f9fc;">
+                        <tr class="text-center">
+                            <th width="5%" class="align-middle">No</th>
+                            <th class="align-middle">NIS</th>
+                            <th class="align-middle">Foto</th>
+                            <th class="align-middle" width="30%">Nama Lengkap</th> {{-- Lebarkan dikit buat progress bar --}}
+                            <th class="align-middle">Kelas</th>
+                            <th class="align-middle">L/P</th>
+                            <th class="align-middle">Status</th>
+                            <th width="10%" class="align-middle">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($murids as $key => $murid)
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
+                        @forelse($murids as $index => $murid)
+                        <tr class="align-middle bg-white">
+                            {{-- NOMOR --}}
+                            <td class="text-center">{{ $index + 1 + ($murids->currentPage() - 1) * $murids->perPage() }}</td>
                             
-                            <td><span class="badge badge-light border">{{ $murid->nis }}</span></td>
-
+                            {{-- NIS --}}
+                            <td class="text-center font-weight-bold text-secondary">{{ $murid->nis ?? '-' }}</td>
+                            
+                            {{-- FOTO --}}
                             <td class="text-center">
                                 @if($murid->foto)
-                                    <img src="{{ asset('storage/' . $murid->foto) }}" alt="Foto" class="table-avatar">
+                                    <img src="{{ asset('storage/'.$murid->foto) }}" class="rounded-circle border" width="35" height="35" style="object-fit: cover;">
                                 @else
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($murid->nama_lengkap) }}&background=random&color=fff&size=64" alt="Foto" class="table-avatar">
+                                    <div class="bg-light rounded-circle border d-inline-flex align-items-center justify-content-center text-secondary" style="width: 35px; height: 35px;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
                                 @endif
                             </td>
-                            <td class="font-weight-bold text-dark">{{ $murid->nama_lengkap }}</td>
-                            <td>{{ $murid->kelas->nama_kelas ?? '-' }}</td>
-                            <td>{{ $murid->jenis_kelamin }}</td>
+                            
+                            {{-- NAMA & PROGRESS BAR (DISINI PERUBAHANNYA) --}}
                             <td>
-                                <span class="badge badge-success px-2 py-1">Aktif</span>
-                            </td>
-                            <td class="text-center">
-                                <a href="{{ route('admin.murid.edit', $murid->id) }}" class="btn btn-warning btn-sm btn-circle" title="Edit">
-                                    <i class="fas fa-pen"></i>
-                                </a>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-dark">{{ $murid->nama_lengkap ?? 'Tanpa Nama' }}</span>
+                                    @if(!$murid->nama_lengkap) <small class="text-danger fst-italic ms-2">(Draft)</small> @endif
+                                </div>
 
-                                <form action="{{ route('admin.murid.destroy', $murid->id) }}" method="POST" class="d-inline form-delete" data-name="{{ $murid->nama_lengkap }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-icon-action btn-icon-delete" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                {{-- LOGIC PROGRESS BAR --}}
+                                @php
+                                    $step = $murid->input_progress ?? 0;
+                                    $maxStep = 4; 
+                                    $percent = ($step / $maxStep) * 100;
+                                    if($percent > 100) $percent = 100;
+                                    
+                                    // Warna Bar
+                                    $barColor = 'bg-secondary';
+                                    if($percent >= 25) $barColor = 'bg-danger';
+                                    if($percent >= 50) $barColor = 'bg-warning';
+                                    if($percent >= 75) $barColor = 'bg-info';
+                                    if($percent >= 100) $barColor = 'bg-success';
+                                @endphp
+
+                                <div class="mt-1">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span style="font-size: 0.65rem;" class="text-muted">Kelengkapan Data: {{ round($percent) }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 4px;">
+                                        <div class="progress-bar {{ $barColor }}" role="progressbar" 
+                                             style="width: {{ $percent }}%;" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- KELAS --}}
+                            <td class="text-center">
+                                @if($murid->kelas)
+                                    <span class="badge bg-primary bg-opacity-75 rounded-pill px-3">{{ $murid->kelas->nama_kelas }}</span>
+                                @else
+                                    <span class="badge bg-secondary rounded-pill px-3">Belum Masuk</span>
+                                @endif
+                            </td>
+
+                            {{-- L/P --}}
+                            <td class="text-center">{{ $murid->jenis_kelamin }}</td>
+
+                            {{-- STATUS --}}
+                            <td class="text-center">
+                                <span class="badge {{ ($murid->status_murid == 'Aktif') ? 'bg-success' : 'bg-danger' }} rounded-pill px-3">
+                                    {{ $murid->status_murid ?? 'Draft' }}
+                                </span>
+                            </td>
+
+                            {{-- AKSI --}}
+                            <td class="text-center">
+                                <x-action-buttons 
+                                    :show="route('admin.murid.show', $murid->id)"
+                                    :edit="route('admin.murid.edit', $murid->id)"
+                                    :delete="route('admin.murid.destroy', $murid->id)"
+                                    :name="$murid->nama_lengkap"
+                                />
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center p-5">
-                                <img src="https://img.freepik.com/free-vector/no-data-concept-illustration_114360-536.jpg" alt="No Data" style="width: 150px; opacity: 0.6;">
-                                <p class="text-muted mt-3 font-weight-bold">Belum ada data murid.</p>
-                                <small class="text-gray-500">Silakan tambah manual atau import excel.</small>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <h6 class="fw-bold mt-2">Data murid belum tersedia</h6>
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            
-            <div class="mt-3">
-                {{-- $murids->links() --}} 
+
+            {{-- 4. PAGINATION --}}
+            <div class="d-flex justify-content-end mt-3">
+                {{ $murids->links() }}
             </div>
-        </div>
-    </div>
+
+        </div> 
+    </div> 
+
 </div>
 
-<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-            
-            <div class="modal-header border-0 bg-gradient-primary-to-secondary" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);">
-                <h5 class="modal-title text-white font-weight-bold" id="importExcelLabel">
-                    <i class="bi bi-file-earmark-spreadsheet-fill me-2"></i> Import Data Murid
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <form action="{{ route('admin.murid.import') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body p-4">
-                    
-                    <div class="alert alert-info d-flex align-items-center" role="alert" style="background: rgba(54, 185, 204, 0.1); border: 1px solid rgba(54, 185, 204, 0.3); color: #36b9cc;">
-                        <i class="bi bi-info-circle-fill me-2 fs-4"></i>
-                        <div>
-                            <small class="fw-bold">Pastikan file sesuai format!</small><br>
-                            <span style="font-size: 0.8rem;">Hanya file <b>.xlsx</b> atau <b>.xls</b> yang diperbolehkan.</span>
-                        </div>
+{{-- 5. MODAL IMPORT EXCEL --}}
+<div class="modal fade" id="importExcel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="{{ route('admin.murid.import') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Import Data Murid</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small">
+                        <strong>Tips:</strong> Gunakan template yang disediakan. Kosongkan NIS jika ingin otomatis.
                     </div>
-
                     <div class="mb-3">
-                        <label for="fileExcel" class="form-label fw-bold text-gray-700">Pilih File Excel</label>
-                        
-                        <input type="file" name="file" class="form-control form-control-lg" id="fileExcel" 
-                               accept=".xlsx, .xls" required 
-                               style="border: 2px solid #1cc88a; border-radius: 10px; padding: 10px;">
-                        
-                        <div class="form-text mt-2 text-muted">
-                            Maksimal ukuran file: 2MB.
-                        </div>
+                        <label class="form-label fw-bold">Pilih File Excel (.xlsx)</label>
+                        <input type="file" name="file" class="form-control" required accept=".xlsx, .xls">
                     </div>
-
                 </div>
-
-                <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-yellow text-white shadow-sm">
-                        <i class="bi bi-upload me-1"></i> Upload Sekarang
-                    </button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
                 </div>
-            </form>
-
-        </div>
+            </div>
+        </form>
     </div>
 </div>
+
+@endsection
 
 @push('scripts')
 <script>
-    // Tidak perlu jQuery lagi untuk modal, Bootstrap 5 mengurusnya otomatis.
-    // Kita hanya butuh listener sederhana jika ingin validasi tambahan di sisi klien (opsional)
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Halaman Murid Siap - Bootstrap 5 Active');
+    // A. Notifikasi SweetAlert
+    @if(session('success'))
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", timer: 3000, showConfirmButton: false });
+    @endif
+    @if(session('error'))
+        Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}" });
+    @endif
+    @if($errors->any())
+        Swal.fire({ icon: 'warning', title: 'Periksa Kembali', html: '<ul class="text-start">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>' });
+    @endif
+
+    // B. Script Konfirmasi Hapus
+    $(document).on('submit', '.form-delete', function(e) {
+        e.preventDefault();
+        var form = this;
+        var nama = $(this).data('name');
+        Swal.fire({
+            title: 'Hapus Data?',
+            text: nama + " akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
     });
 </script>
 @endpush
-
-<script>
-    $(document).ready(function() {
-        // 1. Paksa Modal muncul saat tombol Import diklik
-        $('[data-target="#importModal"]').click(function(e) {
-            e.preventDefault();
-            $('#importModal').modal('show');
-        });
-
-        // 2. SOLUSI LAYAR HITAM: Paksa hapus backdrop saat modal ditutup
-        // Script ini akan berjalan setiap kali modal disembunyikan (hidden)
-        $('#importModal').on('hidden.bs.modal', function () {
-            // Hapus paksa elemen layar hitam
-            $('.modal-backdrop').remove();
-            
-            // Hapus class yang membuat body tidak bisa discroll
-            $('body').removeClass('modal-open');
-            $('body').css('padding-right', '');
-        });
-
-        // 3. Tambahan: Tombol "Batal" dan "X" juga memicu penutupan manual
-        $('.close, .btn-secondary').click(function() {
-            $('#importModal').modal('hide');
-        });
-
-        // Agar nama file muncul di input type file custom bootstrap
-        $(".custom-file-input").on("change", function() {
-        var fileName = $(this).val().split("\\").pop();
-        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
-    });
-</script>
-@endsection
