@@ -86,9 +86,15 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/jam-kbm/category', [JamKbmController::class, 'storeCategory'])->name('jam_kbm.category.store');
         Route::post('/jam-kbm/activate', [JamKbmController::class, 'activate'])->name('jam_kbm.activate');
 
-    }); // <-- Tutup Group Master
+    });
 
+    // MASTER DATA UMUM
+    Route::prefix('admin/master')->name('admin.master.')->group(function () {
+        // Route untuk Agama (Otomatis buat rute index, store, update, destroy)
+        Route::resource('agama', \App\Http\Controllers\AgamaController::class)->except(['create', 'edit', 'show']);
+    });
 
+    
     /// D. MODUL KESISWAAN (Di luar Master, tapi masih dalam Admin)
     Route::prefix('murid')->name('murid.')->group(function () {
         

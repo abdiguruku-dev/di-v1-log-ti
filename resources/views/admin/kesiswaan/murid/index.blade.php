@@ -132,26 +132,29 @@
                                 @endif
                             </td>
                             
-                            {{-- NAMA & PROGRESS BAR (DISINI PERUBAHANNYA) --}}
+                            {{-- NAMA & PROGRESS BAR (SUDAH DIPERBAIKI LOGIKANYA) --}}
                             <td>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fw-bold text-dark">{{ $murid->nama_lengkap ?? 'Tanpa Nama' }}</span>
                                     @if(!$murid->nama_lengkap) <small class="text-danger fst-italic ms-2">(Draft)</small> @endif
                                 </div>
 
-                                {{-- LOGIC PROGRESS BAR --}}
+                                {{-- LOGIC PROGRESS BAR FIXED --}}
                                 @php
                                     $step = $murid->input_progress ?? 0;
-                                    $maxStep = 4; 
+                                    
+                                    // PERBAIKAN: Max Step jadi 8 sesuai Wizard Boss
+                                    $maxStep = 8; 
+                                    
                                     $percent = ($step / $maxStep) * 100;
                                     if($percent > 100) $percent = 100;
                                     
-                                    // Warna Bar
+                                    // Warna Bar (Logic Baru)
                                     $barColor = 'bg-secondary';
-                                    if($percent >= 25) $barColor = 'bg-danger';
-                                    if($percent >= 50) $barColor = 'bg-warning';
-                                    if($percent >= 75) $barColor = 'bg-info';
-                                    if($percent >= 100) $barColor = 'bg-success';
+                                    if($percent > 12) $barColor = 'bg-danger';   // Step 1-2 (Merah)
+                                    if($percent > 37) $barColor = 'bg-warning';  // Step 3-4 (Kuning)
+                                    if($percent > 62) $barColor = 'bg-info';     // Step 5-6 (Biru)
+                                    if($percent >= 100) $barColor = 'bg-success';// Selesai (Hijau)
                                 @endphp
 
                                 <div class="mt-1">

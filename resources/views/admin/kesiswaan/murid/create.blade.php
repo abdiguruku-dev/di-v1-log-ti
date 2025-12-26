@@ -44,20 +44,20 @@
                 <div class="tab-pane fade show active">
                     <h5 class="text-primary font-weight-bold mb-4">Langkah 1: Jalur Pendaftaran</h5>
                     <div class="row justify-content-center">
-                        <div class="col-md-10">
+                        <div class="col-md-8">
                             <label class="d-block mb-3 fw-bold text-center">Status Masuk Murid:</label>
-                            <div class="row g-3 custom-radio-group">
+                            <div class="row g- custom-radio-group">
                                 <div class="col-md-4">
                                     <input type="radio" name="jenis_pendaftaran" id="jp1" value="Siswa Baru" required checked>
-                                    <label for="jp1"><i class="fas fa-user-graduate fa-2x mb-2 d-block"></i>Murid Baru</label>
+                                    <label for="jp1"><i class="fas fa-user-graduate fa-2x d-block"></i>Murid Baru</label>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="radio" name="jenis_pendaftaran" id="jp2" value="Pindahan">
-                                    <label for="jp2"><i class="fas fa-exchange-alt fa-2x mb-2 d-block"></i>Pindahan</label>
+                                    <label for="jp2"><i class="fas fa-exchange-alt fa-2x d-block"></i>Pindahan</label>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="radio" name="jenis_pendaftaran" id="jp3" value="Kembali Bersekolah">
-                                    <label for="jp3"><i class="fas fa-undo fa-2x mb-2 d-block"></i>Kembali Sekolah</label>
+                                    <label for="jp3"><i class="fas fa-undo fa-2x d-block"></i>Kembali Sekolah</label>
                                 </div>
                             </div>
                         </div>
@@ -180,6 +180,8 @@
                             <h6 class="text-primary fw-bold">Ayah</h6>
                             <div class="mb-2"><label>Nama <span class="text-danger">*</span></label><input type="text" name="nama_ayah" class="form-control" required></div>
                             <div class="mb-2"><label>NIK</label><input type="number" name="nik_ayah" class="form-control"></div>
+                            <div class="mb-2"><label>Tempat, Tanggal Lahir</label><input type="text" name="tempat_tanggal_lahir_ayah" class="form-control"></div>
+                            <div class="mb-2"><label>Pendidikan</label><input type="text" name="pendidikan_ayah" class="form-control"></div>
                             <div class="mb-2"><label>Pekerjaan</label><input type="text" name="pekerjaan_ayah" class="form-control"></div>
                             <div class="mb-2"><label>Penghasilan</label><input type="text" name="penghasilan_ayah" class="form-control"></div>
                         </div>
@@ -187,6 +189,8 @@
                             <h6 class="text-success fw-bold">Ibu</h6>
                             <div class="mb-2"><label>Nama <span class="text-danger">*</span></label><input type="text" name="nama_ibu" class="form-control" required></div>
                             <div class="mb-2"><label>NIK</label><input type="number" name="nik_ibu" class="form-control"></div>
+                            <div class="mb-2"><label>Tempat, Tangga Lahir</label><input type="text" name="tempat_tanggal_lahir_ibu" class="form-control"></div>
+                            <div class="mb-2"><label>Pendidikan</label><input type="text" name="pendidikan_ibu" class="form-control"></div>
                             <div class="mb-2"><label>Pekerjaan</label><input type="text" name="pekerjaan_ibu" class="form-control"></div>
                             <div class="mb-2"><label>Penghasilan</label><input type="text" name="penghasilan_ibu" class="form-control"></div>
                         </div>

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Imports\MuridImport;
 use App\Exports\MuridExport;
 use Maatwebsite\Excel\Facades\Excel;
-use PDF; // Pastikan library dompdf terinstall
+use PDF; 
 
 class MuridController extends Controller
 {
@@ -40,9 +40,7 @@ class MuridController extends Controller
             });
         }
 
-        // PERBAIKAN DISINI:
-        // JANGAN pakai $query->get(); <--- Ini penyebab error
-        // GANTI jadi paginate(10); agar view bisa membaca halaman.
+        // SUDAH BENAR: Pakai paginate agar tidak error currentPage()
         $murids = $query->paginate(10); 
 
         return view('admin.kesiswaan.murid.index', compact('murids'));
@@ -57,7 +55,7 @@ class MuridController extends Controller
         return view('admin.kesiswaan.murid.create', compact('kelas', 'jurusans', 'lastNis'));
     }
 
-    // 3. STORE (Final)
+    // 3. STORE (Validasi ada di file StoreMuridRequest.php)
     public function store(StoreMuridRequest $request)
     {
         $files = [
@@ -70,19 +68,36 @@ class MuridController extends Controller
             'file_surat_mutasi' => $request->file('file_surat_mutasi'),
             'file_surat_kematian' => $request->file('file_surat_kematian'),
         ];
+        
+        // Logic simpan ada di Service
         $this->muridService->handleStore($request->validated(), $files);
+        
         return redirect()->route('admin.murid.index')->with('success', 'Data Murid Berhasil Disimpan!');
     }
 
-    // 4. SAVE DRAFT (Ajax)
+    // 4. SAVE DRAFT (Ajax) - DISINI KITA TAMBAH VALIDASI NIK
     public function saveDraft(Request $request)
     {
         try {
+            // Validasi Step 1 (Jenis Pendaftaran)
             if ($request->step == 1 && !$request->id) {
                 $request->validate(['jenis_pendaftaran' => 'required']);
             }
+            
+            // Validasi Step 2 (Biodata Diri - NIK ada disini)
             if ($request->step == 2) {
-                 $request->validate(['nama_lengkap' => 'required']);
+                 $request->validate([
+                    'nama_lengkap' => 'required',
+                    // PERBAIKAN BARU: Validasi NIK saat Draft
+                    // 'nullable' artinya boleh kosong saat draft, tapi kalau diisi WAJIB angka & 16 digit
+                    'nik'          => 'nullable|numeric|digits:16', 
+                    'no_kk'        => 'nullable|numeric|digits:16',
+                 ], [
+                    'nik.numeric'  => 'NIK harus angka!',
+                    'nik.digits'   => 'NIK harus 16 digit!',
+                    'no_kk.numeric'=> 'KK harus angka!',
+                    'no_kk.digits' => 'KK harus 16 digit!',
+                 ]);
             }
 
             $data = $request->except(['_token', 'step', 'id', 'foto', 'file_kk', 'file_akte', 'file_ijazah', 'file_rapor']);
@@ -107,7 +122,6 @@ class MuridController extends Controller
     public function show($id)
     {
         $murid = Murid::with(['kelas', 'jurusan'])->findOrFail($id);
-        // Jika view show belum ada, return json atau data dummy
         if (view()->exists('admin.kesiswaan.murid.show')) {
             return view('admin.kesiswaan.murid.show', compact('murid'));
         }
@@ -161,10 +175,7 @@ class MuridController extends Controller
     public function exportPdf()
     {
         $murids = Murid::with(['kelas', 'jurusan'])->get();
-        // Gunakan view index sebagai template PDF sementara
         $pdf = PDF::loadView('admin.kesiswaan.murid.index', compact('murids')); 
-        // Agar rapi, sebaiknya buat file view baru: admin.kesiswaan.murid.print_pdf
         return $pdf->download('data_murid.pdf');
     }
-
-} // <--- KURUNG TUTUP CLASS (JANGAN DIHAPUS)
+}

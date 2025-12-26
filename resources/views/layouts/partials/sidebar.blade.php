@@ -65,7 +65,12 @@
         </a>
         <div class="collapse" id="masterUmum" data-bs-parent="#sidebarAccordion">
             <ul class="submenu">
-                <li><a href="#" class="nav-link"><i class="bi bi-circle-fill"></i> <span>Agama</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.master.agama.*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('admin.master.agama.index') }}">
+        <i class="bi bi-star"></i>
+        <span>Master Agama</span>
+    </a>
+</li>
                 <li><a href="#" class="nav-link"><i class="bi bi-circle-fill"></i> <span>Pekerjaan</span></a></li>
                 <li><a href="#" class="nav-link"><i class="bi bi-circle-fill"></i> <span>Pendidikan</span></a></li>
                 <li><a href="#" class="nav-link"><i class="bi bi-circle-fill"></i> <span>Hubungan Keluarga</span></a></li>
